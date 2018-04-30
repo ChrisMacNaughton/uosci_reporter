@@ -6,6 +6,11 @@ git:
 notifications:
   email: false
 
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
 python:
   - "2.7"
   - "3.5"
@@ -14,7 +19,9 @@ python:
 
 install: 
   - pip install tox-travis
+
 script:
   - tox -c tox.ini -e pep8
   - tox
-after_success: coverage combine && codeclimate-test-reporter
+
+after_success: coverage combine && ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
