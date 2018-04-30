@@ -8,6 +8,7 @@ from setuptools.command.test import test as TestCommand
 
 version = "0.0.1.dev1"
 install_require = [
+    'python-jenkins == 1.0.0',
 ]
 
 tests_require = [
@@ -71,6 +72,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
+            'uosci-mojo = uosci_reporter.mojo:main',
             # 'functest-run-suite = zaza.charm_lifecycle.func_test_runner:main',
             # 'functest-deploy = zaza.charm_lifecycle.deploy:main',
             # 'functest-configure = zaza.charm_lifecycle.configure:main',
