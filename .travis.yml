@@ -1,19 +1,20 @@
 sudo: false
 language: python
 dist: xenial
-
-install: 
-  - pip install tox-travis
-
-script:
-  - tox -c tox.ini -e pep8
-  - tox
+git:
+  depth: 10
+notifications:
+  email: false
 
 python:
   - "2.7"
   - "3.5"
   - "3.6"
-  - "3.7"
+  - "3.7-dev"
 
-git:
-  depth: 10
+install: 
+  - pip install tox-travis
+script:
+  - tox -c tox.ini -e pep8
+  - tox
+after_success: coverage combine && codeclimate-test-reporter
