@@ -1,0 +1,6 @@
+.tox
+*.pyc
+build/
+dist/
+.local
+uosci_reproter.egg-info/

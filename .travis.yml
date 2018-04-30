@@ -1,0 +1,21 @@
+sudo: false
+language: python
+dist: xenial
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+
+install: 
+  - pip install tox-travis
+
+stages:
+- lints
+- test
+
+jobs:
+  include:
+    - stage: test
+      script: tox
+    - stage: lints
+      script: tox -c tox.ini -e pep8
