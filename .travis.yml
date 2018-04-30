@@ -5,20 +5,15 @@ dist: xenial
 install: 
   - pip install tox-travis
 
-stages:
-- lints
-- test
-
-script: tox
+script:
+  - tox -c tox.ini -e pep8
+  - tox
 
 python:
+  - "2.7"
   - "3.5"
   - "3.6"
   - "3.7"
-    
-jobs:
-  - stage: lints
-    script: tox -c tox.ini -e pep8
 
 git:
   depth: 10
