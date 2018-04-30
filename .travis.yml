@@ -10,19 +10,15 @@ stages:
 - test
 
 script: tox
+
 python:
   - "3.5"
   - "3.6"
   - "3.7"
     
 jobs:
-  include:
-    - stage: lints
-      script: tox -c tox.ini -e pep8
-      python:
-        - "3.5"
-        - "3.6"
-        - "3.7"
+  - stage: lints
+    script: tox -c tox.ini -e pep8
 
 git:
   depth: 10
