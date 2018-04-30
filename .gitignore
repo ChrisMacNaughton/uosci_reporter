@@ -5,3 +5,4 @@ dist/
 .local
 uosci_reproter.egg-info/
 .coverage
+coverage.xml
