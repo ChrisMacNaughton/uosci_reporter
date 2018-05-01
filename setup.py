@@ -55,7 +55,7 @@ if sys.argv[-1] == 'tag':
 
 
 setup(
-    name='uosci_reporter',
+    name='uosci',
     version=version,
     description='Generates summary reports from UOSCI runs',
     classifiers=[
@@ -72,7 +72,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'uosci-mojo = uosci_reporter.mojo:main',
+            'uosci-mojo = uosci.mojo:main',
             # 'functest-run-suite = zaza.charm_lifecycle.func_test_runner:main',
             # 'functest-deploy = zaza.charm_lifecycle.deploy:main',
             # 'functest-configure = zaza.charm_lifecycle.configure:main',
@@ -83,7 +83,7 @@ setup(
             # 'tempest-config = zaza.tempest_config:main',
         ]
     },
-    url='https://github.com/ChrisMacNaughton/uosci_reporter',
+    url='https://github.com/ChrisMacNaughton/uosci',
     author='Chris MacNaughton',
     author_email='chris.macnaughton@canonical.com',
     license='Apache-2.0: http://www.apache.org/licenses/LICENSE-2.0',

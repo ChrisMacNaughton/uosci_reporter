@@ -1,22 +1,15 @@
 import mock
-import uosci_reporter.mojo as mojo
+import uosci.mojo as mojo
 import unit_tests.utils as ut_utils
 
+import unittest
 
-class TestModel(ut_utils.BaseTestCase):
+
+class TestModel(unittest.TestCase):
     def setUp(self):
         super(TestModel, self).setUp()
 
-    def test_mojo_matrix_view(self):
-        client = mock.MagicMock()
-        client.get_jobs.return_value = [
-            {
-                '_class': 'hudson.model.FreeStyleProject',
-                'name': 'test_job',
-                'url': 'http://127.0.0.1:8080/job/test_job/',
-                'color': 'blue',
-                'fullname': 'test_job'
-            }]
-        jobs = mojo.mojo_matrix(client)
-        client.get_jobs.assert_called_with(view_name='MojoMatrix')
-        self.assertEqual(len(jobs), 1)
+    @mock.patch.object(mojo.jenkins, 'matrix')
+    def test_main(self, _matrix):
+        mojo.main()
+        _matrix.assert_called_with('MojoMatrix')

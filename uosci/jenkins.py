@@ -7,8 +7,8 @@ def client(username, password, host='http://10.245.162.49:8080'):
                            password=password)
 
 
-def mojo_matrix(client):
-    views = client.get_jobs(view_name='MojoMatrix')
+def matrix(client, view_name):
+    views = client.get_jobs(view_name=view_name)
     return views
 
 
