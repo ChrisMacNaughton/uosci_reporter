@@ -20,20 +20,45 @@ class Jenkins(jenkins.Jenkins):
             depth=1)
         results = {}
         for run in build_info['runs']:
-            try:
-                series = run['url'].split('U_OS=')[-1].split('/')[0]
-                if results.get(job['name']) is None:
-                    results[job['name']] = {}
-                date = datetime.fromtimestamp(run['timestamp'] / 1000)
-                thirty_days_ago = datetime.now() - timedelta(days=30)
-                if date < thirty_days_ago:
-                    continue
-                results[job['name']][series] = {
-                    'successful': run['result'] == "SUCCESS",
-                    'url': run['url'],
-                    'date': date,
-                }
-            except Exception as e:
-                print("Exception: {}".format(e))
-                pass
+            if results.get(job['name']) is None:
+                results[job['name']] = {}
+
+            series = get_series_from_url(run['url'])
+            details = self.result_from_run(run)
+            if details is not None:
+                results[job['name']][series] = details
         return results
+
+
+def result_from_run(run):
+    """
+    Summarizes a run from Jenkins API
+
+    :param run: Details of the run from Jenkins
+    :type dict
+    :returns Summary of the run
+    :rtype dict
+    """
+    date = datetime.fromtimestamp(run['timestamp'] / 1000)
+    thirty_days_ago = datetime.now() - timedelta(days=30)
+    if date < thirty_days_ago:
+        return
+    return {
+        'successful': run['result'] == "SUCCESS",
+        'url': run['url'],
+        'date': date,
+    }
+
+
+def get_series_from_url(url):
+    """
+    Breaks a Jenkins job URL out to retrieve U_OS combination
+
+
+    :param url: Jenkins job URL
+    :type str
+    :returns: Ubuntu/OpenStack combination
+    :rtype: Option(str)
+    """
+    if 'U_OS' in url:
+        return url.split('U_OS=')[-1].split('/')[0]

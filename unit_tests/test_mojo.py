@@ -19,6 +19,18 @@ class TestModel(unittest.TestCase):
         _execute.assert_called_with(
             'http://10.245.162.49:8080', 'test', 'test-pass', None)
 
+    @mock.patch.object(mojo, 'execute')
+    def test_filter(self, _execute):
+        old_sys_argv = mojo.sys.argv
+        mojo.sys.argv = [old_sys_argv[0]] + \
+            ['-u', 'test', '-p', 'test-pass', '-f', 'test_stuff']
+        try:
+            mojo.main()
+        finally:
+            mojo.argv = old_sys_argv
+        _execute.assert_called_with(
+            'http://10.245.162.49:8080', 'test', 'test-pass', 'test_stuff')
+
     @mock.patch.object(mojo.uosci_jenkins, 'Jenkins')
     def test_main(self, _jenkins):
         client = mock.MagicMock()
