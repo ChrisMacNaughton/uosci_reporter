@@ -17,7 +17,7 @@ class TestModel(unittest.TestCase):
         finally:
             mojo.argv = old_sys_argv
         _execute.assert_called_with(
-            'http://10.245.162.49:8080', 'test', 'test-pass')
+            'http://10.245.162.49:8080', 'test', 'test-pass', None)
 
     @mock.patch.object(mojo.uosci_jenkins, 'Jenkins')
     def test_main(self, _jenkins):

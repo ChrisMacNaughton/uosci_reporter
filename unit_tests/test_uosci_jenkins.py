@@ -16,7 +16,7 @@ class TestModel(unittest.TestCase):
         _jenkins.assert_called_with(
             'http://127.0.0.1:8080',
             username='test_user',
-            password='test_password')
+            password='test_password',)
 
     # @mock.patch.object(uosci_jenkins, 'Jenkins')
     @mock.patch("uosci.uosci_jenkins.jenkins.Jenkins.get_jobs")
