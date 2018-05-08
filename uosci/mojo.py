@@ -59,7 +59,8 @@ def save_results_to_sheet(results, sheet, credentials):
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
 
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(credentials, scope)
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        credentials, scope)
     gc = gspread.authorize(credentials)
     wks = gc.open_by_url(sheet).sheet1
     print("wks: {}".format(wks))
@@ -70,7 +71,7 @@ def save_results_to_sheet(results, sheet, credentials):
             for uos, job in spec_list.items():
                 specs[job['spec']] = name
                 break
-    for row in data:
+    for id, row in enumerate(data):
         row_spec = row['Spec/Bundle/Test']
         if row_spec is '':
             continue
@@ -88,7 +89,6 @@ def save_results_to_sheet(results, sheet, credentials):
     #     print("Row: {}".format(row))
     #     if i > 60 and len(row) is 0:
     #         break
-
 
 
 def fetch_results(host,
