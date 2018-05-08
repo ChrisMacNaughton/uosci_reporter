@@ -40,10 +40,13 @@ def result_from_run(run):
     thirty_days_ago = datetime.now() - timedelta(days=30)
     if date < thirty_days_ago:
         return
+    name_split = run['fullDisplayName'].split(' ')
     return {
         'successful': run['result'] == "SUCCESS",
         'url': run['url'],
         'date': date,
+        'name': name_split[0],
+        'spec': name_split[-2].split(',')[0],
     }
 
 

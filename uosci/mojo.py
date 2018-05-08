@@ -1,6 +1,7 @@
 import argparse
 import sys
-import pprint
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 import uosci.uosci_jenkins as uosci_jenkins
 
@@ -47,7 +48,47 @@ def execute(host,
         username=username,
         password=password,
         filter=filter)
-    pprint.pprint(results)
+    # print(results)
+    save_results_to_sheet(
+        results=results,
+        sheet=sheet,
+        credentials=credentials)
+
+
+def save_results_to_sheet(results, sheet, credentials):
+    scope = ['https://spreadsheets.google.com/feeds',
+             'https://www.googleapis.com/auth/drive']
+
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(credentials, scope)
+    gc = gspread.authorize(credentials)
+    wks = gc.open_by_url(sheet).sheet1
+    print("wks: {}".format(wks))
+    data = wks.get_all_records(head=3)
+    specs = {}
+    for name, spec_list in results.items():
+        if specs.get(name) is None:
+            for uos, job in spec_list.items():
+                specs[job['spec']] = name
+                break
+    for row in data:
+        row_spec = row['Spec/Bundle/Test']
+        if row_spec is '':
+            continue
+        job = specs.get(row_spec)
+        if job is None:
+            continue
+        print("Updating job {}".format(job))
+        print("Row: {}".format(row))
+        run = results[job]
+        print("Last Run: {}".format(run))
+    # for i in range(wks.row_count):
+    #     i+=1
+    #     print("Going to fetch row {}".format(i))
+    #     row = wks.row_values(i)
+    #     print("Row: {}".format(row))
+    #     if i > 60 and len(row) is 0:
+    #         break
+
 
 
 def fetch_results(host,
@@ -63,6 +104,7 @@ def fetch_results(host,
         if filter_job(job['name'], filter):
             continue
         results[job['name']] = client.job_result(job)
+    return results
 
 
 def filter_job(job_name, filter=None):
