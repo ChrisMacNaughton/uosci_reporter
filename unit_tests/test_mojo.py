@@ -11,34 +11,47 @@ class TestModel(unittest.TestCase):
     def test_call_main(self, _execute):
         old_sys_argv = mojo.sys.argv
         mojo.sys.argv = [old_sys_argv[0]] + \
-            ['-u', 'test', '-p', 'test-pass']
+            ['-u', 'test', '-p', 'test-pass', '-g', 'creds.json']
         try:
             mojo.main()
         finally:
             mojo.argv = old_sys_argv
         _execute.assert_called_with(
-            'http://10.245.162.49:8080', 'test', 'test-pass', None)
+            credentials='creds.json',
+            filter=None,
+            host='http://10.245.162.49:8080',
+            password='test-pass',
+            sheet='https://docs.google.com/spreadsheets/d/1d31P5Qu_nP'
+                  '__gCsoy4u6egpSnG34bMjpVijKtlJSmLU',
+            username='test')
 
     @mock.patch.object(mojo, 'execute')
     def test_filter(self, _execute):
         old_sys_argv = mojo.sys.argv
         mojo.sys.argv = [old_sys_argv[0]] + \
-            ['-u', 'test', '-p', 'test-pass', '-f', 'test_stuff']
+            ['-u', 'test', '-p', 'test-pass', '-f',
+             'test_stuff', '-g', '/home/test/creds.json']
         try:
             mojo.main()
         finally:
             mojo.argv = old_sys_argv
         _execute.assert_called_with(
-            'http://10.245.162.49:8080', 'test', 'test-pass', 'test_stuff')
+            credentials='/home/test/creds.json',
+            filter='test_stuff',
+            host='http://10.245.162.49:8080',
+            password='test-pass',
+            sheet='https://docs.google.com/spreadsheets/d/1d31P5Qu_nP'
+                  '__gCsoy4u6egpSnG34bMjpVijKtlJSmLU',
+            username='test')
 
     @mock.patch.object(mojo.uosci_jenkins, 'Jenkins')
-    def test_execute(self, _jenkins):
+    def test_fetch_results(self, _jenkins):
         client = mock.MagicMock()
         _jenkins.return_value = client
         client.matrix.return_value = [{
             'name': 'test'
         }]
-        mojo.execute(
+        mojo.fetch_results(
             host='http://127.0.0.1:8080',
             username='test_user',
             password='test_password'
@@ -52,19 +65,21 @@ class TestModel(unittest.TestCase):
     def test_parser(self):
         args = mojo.parse_args([
             '-u', 'test_user',
-            '-p', 'supersecret'])
+            '-p', 'supersecret',
+            '-g', 'creds.json'])
         self.assertEqual(args.username, 'test_user')
         self.assertEqual(args.password, 'supersecret')
         self.assertEqual(args.host, 'http://10.245.162.49:8080')
+        self.assertEqual(args.google_credentials, 'creds.json')
 
     @mock.patch.object(mojo.uosci_jenkins, 'Jenkins')
-    def test_execute_with_filter(self, _jenkins):
+    def test_fetch_results_with_filter(self, _jenkins):
         client = mock.MagicMock()
         _jenkins.return_value = client
         client.matrix.return_value = [{
             'name': 'testing stuff'
         }]
-        mojo.execute(
+        mojo.fetch_results(
             host='http://127.0.0.1:8080',
             username=None,
             password=None,

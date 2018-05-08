@@ -20,11 +20,18 @@ def parse_args(args):
     parser.add_argument('-p', '--password',
                         help='Jenkins password',
                         required=False)
+    parser.add_argument('-g', '--google-credentials',
+                        help='Path to the downloaded Google credentials',
+                        required=True)
     parser.add_argument('-t', '--host',
                         help='Jenkins host')
+    parser.add_argument('-s', '--sheet',
+                        help='Google Sheet URL')
     parser.add_argument('-f', '--filter',
                         help='Filter results by job name')
     parser.set_defaults(host='http://10.245.162.49:8080')
+    parser.set_defaults(sheet='https://docs.google.com/spreadsheets/d/1d31P5Qu'
+                              '_nP__gCsoy4u6egpSnG34bMjpVijKtlJSmLU')
     parser.set_defaults(filter=None)
     return parser.parse_args(args)
 
@@ -32,7 +39,21 @@ def parse_args(args):
 def execute(host,
             username,
             password,
+            sheet,
+            credentials,
             filter=None):
+    results = fetch_results(
+        host=host,
+        username=username,
+        password=password,
+        filter=filter)
+    pprint.pprint(results)
+
+
+def fetch_results(host,
+                  username,
+                  password,
+                  filter=None):
     client = uosci_jenkins.Jenkins(
         host, username=username, password=password)
     jobs = client.matrix('MojoMatrix')
@@ -42,7 +63,6 @@ def execute(host,
         if filter_job(job['name'], filter):
             continue
         results[job['name']] = client.job_result(job)
-    pprint.pprint(results)
 
 
 def filter_job(job_name, filter=None):
@@ -56,4 +76,9 @@ def filter_job(job_name, filter=None):
 def main():
     print("Gathering results from the last Mojo runs")
     args = parse_args(sys.argv[1:])
-    execute(args.host, args.username, args.password, args.filter)
+    execute(host=args.host,
+            username=args.username,
+            password=args.password,
+            sheet=args.sheet,
+            credentials=args.google_credentials,
+            filter=args.filter)
