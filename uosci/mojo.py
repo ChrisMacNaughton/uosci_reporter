@@ -16,10 +16,10 @@ def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--username',
                         help='Jenkins User',
-                        required=True)
+                        required=False)
     parser.add_argument('-p', '--password',
                         help='Jenkins password',
-                        required=True)
+                        required=False)
     parser.add_argument('-t', '--host',
                         help='Jenkins host')
     parser.add_argument('-f', '--filter',

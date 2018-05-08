@@ -24,7 +24,7 @@ class Jenkins(jenkins.Jenkins):
                 results[job['name']] = {}
 
             series = get_series_from_url(run['url'])
-            details = self.result_from_run(run)
+            details = result_from_run(run)
             if details is not None:
                 results[job['name']][series] = details
         return results
