@@ -37,14 +37,14 @@ def execute(host,
         host, username=username, password=password)
     jobs = client.matrix('MojoMatrix')
     # print("Jobs: {}".format(jobs))
-    results = []
+    results = {}
     for job in jobs:
         if 'test' not in job['name']:
             continue
         if filter is not None:
             if filter not in job['name']:
                 continue
-        results.append(client.job_result(job))
+        results[job['name']] = client.job_result(job)
     pprint.pprint(results)
 
 
