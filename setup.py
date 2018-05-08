@@ -9,6 +9,8 @@ from setuptools.command.test import test as TestCommand
 version = "0.0.1.dev1"
 install_require = [
     'python-jenkins == 1.0.0',
+    'oauth2client == 4.1.2',
+    'gspread == 3.0.0',
 ]
 
 tests_require = [
