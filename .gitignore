@@ -6,3 +6,4 @@ dist/
 uosci_reproter.egg-info/
 .coverage
 coverage.xml
+cover

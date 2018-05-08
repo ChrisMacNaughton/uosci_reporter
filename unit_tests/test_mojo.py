@@ -32,10 +32,12 @@ class TestModel(unittest.TestCase):
             'http://10.245.162.49:8080', 'test', 'test-pass', 'test_stuff')
 
     @mock.patch.object(mojo.uosci_jenkins, 'Jenkins')
-    def test_main(self, _jenkins):
+    def test_execute(self, _jenkins):
         client = mock.MagicMock()
         _jenkins.return_value = client
-        client.matrix.return_value = []
+        client.matrix.return_value = [{
+            'name': 'test'
+        }]
         mojo.execute(
             host='http://127.0.0.1:8080',
             username='test_user',
@@ -54,3 +56,17 @@ class TestModel(unittest.TestCase):
         self.assertEqual(args.username, 'test_user')
         self.assertEqual(args.password, 'supersecret')
         self.assertEqual(args.host, 'http://10.245.162.49:8080')
+
+    @mock.patch.object(mojo.uosci_jenkins, 'Jenkins')
+    def test_execute_with_filter(self, _jenkins):
+        client = mock.MagicMock()
+        _jenkins.return_value = client
+        client.matrix.return_value = [{
+            'name': 'testing stuff'
+        }]
+        mojo.execute(
+            host='http://127.0.0.1:8080',
+            username=None,
+            password=None,
+            filter='testing',
+        )

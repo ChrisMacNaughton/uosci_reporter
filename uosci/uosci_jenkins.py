@@ -20,13 +20,10 @@ class Jenkins(jenkins.Jenkins):
             depth=1)
         results = {}
         for run in build_info['runs']:
-            if results.get(job['name']) is None:
-                results[job['name']] = {}
-
             series = get_series_from_url(run['url'])
             details = result_from_run(run)
             if details is not None:
-                results[job['name']][series] = details
+                results[series] = details
         return results
 
 
