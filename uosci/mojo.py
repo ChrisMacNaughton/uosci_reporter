@@ -39,13 +39,18 @@ def execute(host,
     # print("Jobs: {}".format(jobs))
     results = {}
     for job in jobs:
-        if 'test' not in job['name']:
+        if filter_job(job['name'], filter):
             continue
-        if filter is not None:
-            if filter not in job['name']:
-                continue
         results[job['name']] = client.job_result(job)
     pprint.pprint(results)
+
+
+def filter_job(job_name, filter=None):
+    if 'test'not in job_name:
+        return True
+    if filter is not None and filter not in job_name:
+        return True
+    return False
 
 
 def main():
