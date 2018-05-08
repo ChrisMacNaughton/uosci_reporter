@@ -78,4 +78,3 @@ class TestModel(unittest.TestCase):
     def test_filter_job_name_with_filter(self):
         self.assertFalse(mojo.filter_job("test_something"))
         self.assertTrue(mojo.filter_job("test_something", "else"))
-
