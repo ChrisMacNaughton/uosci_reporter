@@ -1,7 +1,7 @@
 import mock
 import unittest
 import uosci_reporter.mojo as mojo
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class TestModel(unittest.TestCase):
@@ -101,7 +101,8 @@ class TestModel(unittest.TestCase):
                 'successful': True,
                 'state': 'Pass',
                 'url': 'http:path/to/jenkins',
-                'date': datetime.fromtimestamp(1525215901043 / 1000),
+                'date': datetime.fromtimestamp(1525215901043 / 1000,
+                                               tz=timezone.utc),
                 'name': 'test_mojo_ha_oneshot_master_matrix',
                 'spec': 'specs/full_stack/ha_oneshot',
             }}})
@@ -125,7 +126,8 @@ class TestModel(unittest.TestCase):
                 'successful': True,
                 'state': 'Pass',
                 'url': 'http:path/to/jenkins',
-                'date': datetime.fromtimestamp(1525215901043 / 1000),
+                'date': datetime.fromtimestamp(1525215901043 / 1000,
+                                               tz=timezone.utc),
                 'name': 'test_mojo_ha_oneshot_master_matrix',
                 'spec': 'specs/full_stack/ha_oneshot',
             }})
@@ -133,7 +135,7 @@ class TestModel(unittest.TestCase):
         self.assertEqual(cell.col, 12)
         self.assertEqual(
             cell.value,
-            '=HYPERLINK("http:path/to/jenkins","02-May - Pass")')
+            '=HYPERLINK("http:path/to/jenkins","01-May - Pass")')
 
     def test_cell_for_row_empty_job(self):
         cell = mojo.cell_for_row(10, 2, {
@@ -141,7 +143,8 @@ class TestModel(unittest.TestCase):
                 'successful': True,
                 'state': 'Pass',
                 'url': 'http:path/to/jenkins',
-                'date': datetime.fromtimestamp(1525215901043 / 1000),
+                'date': datetime.fromtimestamp(1525215901043 / 1000,
+                                               tz=timezone.utc),
                 'name': 'test_mojo_ha_oneshot_master_matrix',
                 'spec': 'specs/full_stack/ha_oneshot',
             }})
