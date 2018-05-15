@@ -112,3 +112,10 @@ class TestModel(unittest.TestCase):
 
         result = uosci_jenkins.result_from_run(run)
         self.assertFalse(result['successful'])
+
+    def test_update_from_successful_run(self):
+        run = RUNS[0]
+        run['result'] = 'SUCCESS'
+        result = uosci_jenkins.result_from_run(run)
+        self.assertTrue(result['successful'])
+        self.assertEqual(result['state'], 'Pass')

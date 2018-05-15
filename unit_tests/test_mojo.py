@@ -1,6 +1,7 @@
 import mock
 import unittest
 import uosci_reporter.mojo as mojo
+from datetime import datetime
 
 
 class TestModel(unittest.TestCase):
@@ -94,7 +95,56 @@ class TestModel(unittest.TestCase):
         self.assertFalse(mojo.filter_job("test_something"))
         self.assertTrue(mojo.filter_job("test_something", "else"))
 
-    # def test_col_id_to_letter(self):
-    #     self.assertEqual(mojo.col_id_to_letter(2), 'B')
-    #     self.assertEqual(mojo.col_id_to_letter(10), 'J')
-    #     self.assertEqual(mojo.col_id_to_letter(26), 'Z')
+    def test_get_job_name_from_specs(self):
+        specs = mojo.get_spec_summary({'test_mojo_ha_oneshot_master_matrix': {
+            'artful-pike': {
+                'successful': True,
+                'state': 'Pass',
+                'url': 'http:path/to/jenkins',
+                'date': datetime.fromtimestamp(1525215901043 / 1000),
+                'name': 'test_mojo_ha_oneshot_master_matrix',
+                'spec': 'specs/full_stack/ha_oneshot',
+            }}})
+        self.assertEqual(
+            specs['specs/full_stack/ha_oneshot'],
+            'test_mojo_ha_oneshot_master_matrix')
+
+    def test_get_job_from_specs(self):
+        specs = {
+            'specs/full_stack/ha_oneshot': 'test_mojo_ha_oneshot_master_matrix'
+        }
+        res = mojo.get_job_from_specs('specs/full_stack/ha_oneshot', specs)
+        self.assertEqual(res, 'test_mojo_ha_oneshot_master_matrix')
+        self.assertIsNone(mojo.get_job_from_specs('Spec/Bundle/Test', specs))
+        self.assertIsNone(mojo.get_job_from_specs('', specs))
+        self.assertIsNone(mojo.get_job_from_specs('NoResult', specs))
+
+    def test_cell_for_row(self):
+        cell = mojo.cell_for_row(11, 2, {
+            'artful-pike': {
+                'successful': True,
+                'state': 'Pass',
+                'url': 'http:path/to/jenkins',
+                'date': datetime.fromtimestamp(1525215901043 / 1000),
+                'name': 'test_mojo_ha_oneshot_master_matrix',
+                'spec': 'specs/full_stack/ha_oneshot',
+            }})
+        self.assertEqual(cell.row, 2)
+        self.assertEqual(cell.col, 12)
+        self.assertEqual(
+            cell.value,
+            '=HYPERLINK("http:path/to/jenkins","02-May - Pass")')
+
+    def test_cell_for_row_empty_job(self):
+        cell = mojo.cell_for_row(10, 2, {
+            'artful-pike': {
+                'successful': True,
+                'state': 'Pass',
+                'url': 'http:path/to/jenkins',
+                'date': datetime.fromtimestamp(1525215901043 / 1000),
+                'name': 'test_mojo_ha_oneshot_master_matrix',
+                'spec': 'specs/full_stack/ha_oneshot',
+            }})
+        self.assertEqual(cell.row, 2)
+        self.assertEqual(cell.col, 11)
+        self.assertEqual(cell.value, 'NA')

@@ -3,7 +3,7 @@ import sys
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-import uosci.uosci_jenkins as uosci_jenkins
+import uosci_reporter.uosci_jenkins as uosci_jenkins
 
 
 SHEET_MAPPING = {
@@ -72,27 +72,36 @@ def execute(host,
 
 def get_job_from_specs(name, specs={}):
     if name is '' or name is 'Spec/Bundle/Test':
-        return
+        return None
     return specs.get(name)
 
 
 def get_spec_summary(results):
     specs = {}
     for name, spec_list in results.items():
-        if specs.get(name) is None:
-            for uos, job in spec_list.items():
-                specs[job['spec']] = name
+        for uos, job in spec_list.items():
+            specs[job['spec']] = name
     return specs
 
 
-def save_results_to_sheet(results, sheet, credentials):
-    print("Saving results to Google Sheet")
-    scope = ['https://spreadsheets.google.com/feeds',
-             'https://www.googleapis.com/auth/drive']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        credentials, scope)
-    gc = gspread.authorize(credentials)
-    worksheet = gc.open_by_url(sheet).sheet1
+def cell_for_row(column_id, row_id, run={}):
+    uos = SHEET_MAPPING[column_id]
+    this_run = run.get(uos)
+    column_id += 1
+    if this_run is not None:
+        value='=HYPERLINK("{}","{} - {}")'.format(
+            this_run['url'],
+            this_run['date'].strftime("%d-%B"),
+            this_run['state'])
+    else:
+        value = 'NA'
+    return gspread.models.Cell(
+        col=column_id,
+        row=row_id,
+        value=value)
+
+
+def process_results_with_worksheet(results, worksheet):
     specs = get_spec_summary(results)
     cells = []
 
@@ -104,22 +113,18 @@ def save_results_to_sheet(results, sheet, credentials):
         row_id += 1
         for (col_id, field) in enumerate(row):
             if col_id in SHEET_MAPPING:
-                uos = SHEET_MAPPING[col_id]
-                this_run = run.get(uos)
-                col_id += 1
-                if this_run is not None:
-                    cells.append(gspread.models.Cell(
-                        col=col_id,
-                        row=row_id,
-                        value='=HYPERLINK("{}","{} - {}")'.format(
-                            this_run['url'],
-                            this_run['date'].strftime("%d-%B"),
-                            this_run['state'])))
-                else:
-                    cells.append(gspread.models.Cell(
-                        col=col_id,
-                        row=row_id,
-                        value='NA'))
+                cells.append(cell_for_row(col_id, row_id, run))
+    return cells
+
+def save_results_to_sheet(results, sheet, credentials):
+    print("Saving results to Google Sheet")
+    scope = ['https://spreadsheets.google.com/feeds',
+             'https://www.googleapis.com/auth/drive']
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        credentials, scope)
+    gc = gspread.authorize(credentials)
+    worksheet = gc.open_by_url(sheet).sheet1
+    cells = process_results_with_worksheet(results, worksheet)
     worksheet.update_cells(cells, value_input_option='USER_ENTERED')
 
 
