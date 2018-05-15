@@ -1,6 +1,6 @@
 import mock
 import unittest
-import uosci.uosci_jenkins as uosci_jenkins
+import uosci_reporter.uosci_jenkins as uosci_jenkins
 
 
 RUNS = [{

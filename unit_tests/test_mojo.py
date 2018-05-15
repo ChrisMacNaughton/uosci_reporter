@@ -1,6 +1,6 @@
 import mock
 import unittest
-import uosci.mojo as mojo
+import uosci_reporter.mojo as mojo
 
 
 class TestModel(unittest.TestCase):
@@ -93,3 +93,8 @@ class TestModel(unittest.TestCase):
     def test_filter_job_name_with_filter(self):
         self.assertFalse(mojo.filter_job("test_something"))
         self.assertTrue(mojo.filter_job("test_something", "else"))
+
+    # def test_col_id_to_letter(self):
+    #     self.assertEqual(mojo.col_id_to_letter(2), 'B')
+    #     self.assertEqual(mojo.col_id_to_letter(10), 'J')
+    #     self.assertEqual(mojo.col_id_to_letter(26), 'Z')

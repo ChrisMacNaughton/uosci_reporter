@@ -6,6 +6,21 @@ from oauth2client.service_account import ServiceAccountCredentials
 import uosci.uosci_jenkins as uosci_jenkins
 
 
+SHEET_MAPPING = {
+    2: 'trusty-icehouse',
+    3: 'trusty-kilo',
+    4: 'trusty-liberty',
+    5: 'trusty-mitaka',
+    6: 'xenial-mitaka',
+    7: 'xenial-newton',
+    8: 'xenial-ocata',
+    9: 'xenial-pike',
+    10: 'xenial-queens',
+    11: 'artful-pike',
+    12: 'bionic-queens'
+}
+
+
 def parse_args(args):
     """Parse command line arguments
 
@@ -55,40 +70,57 @@ def execute(host,
         credentials=credentials)
 
 
-def save_results_to_sheet(results, sheet, credentials):
-    scope = ['https://spreadsheets.google.com/feeds',
-             'https://www.googleapis.com/auth/drive']
+def get_job_from_specs(name, specs={}):
+    if name is '' or name is 'Spec/Bundle/Test':
+        return
+    return specs.get(name)
 
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        credentials, scope)
-    gc = gspread.authorize(credentials)
-    wks = gc.open_by_url(sheet).sheet1
-    print("wks: {}".format(wks))
-    data = wks.get_all_records(head=3)
+
+def get_spec_summary(results):
     specs = {}
     for name, spec_list in results.items():
         if specs.get(name) is None:
             for uos, job in spec_list.items():
                 specs[job['spec']] = name
-                break
-    for id, row in enumerate(data):
-        row_spec = row['Spec/Bundle/Test']
-        if row_spec is '':
-            continue
-        job = specs.get(row_spec)
+    return specs
+
+
+def save_results_to_sheet(results, sheet, credentials):
+    print("Saving results to Google Sheet")
+    scope = ['https://spreadsheets.google.com/feeds',
+             'https://www.googleapis.com/auth/drive']
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        credentials, scope)
+    gc = gspread.authorize(credentials)
+    worksheet = gc.open_by_url(sheet).sheet1
+    specs = get_spec_summary(results)
+    cells = []
+
+    for row_id, row in enumerate(worksheet.get_all_values()):
+        job = get_job_from_specs(row[1], specs)
         if job is None:
             continue
-        print("Updating job {}".format(job))
-        print("Row: {}".format(row))
         run = results[job]
-        print("Last Run: {}".format(run))
-    # for i in range(wks.row_count):
-    #     i+=1
-    #     print("Going to fetch row {}".format(i))
-    #     row = wks.row_values(i)
-    #     print("Row: {}".format(row))
-    #     if i > 60 and len(row) is 0:
-    #         break
+        row_id += 1
+        for (col_id, field) in enumerate(row):
+            if col_id in SHEET_MAPPING:
+                uos = SHEET_MAPPING[col_id]
+                this_run = run.get(uos)
+                col_id += 1
+                if this_run is not None:
+                    cells.append(gspread.models.Cell(
+                        col=col_id,
+                        row=row_id,
+                        value='=HYPERLINK("{}","{} - {}")'.format(
+                            this_run['url'],
+                            this_run['date'].strftime("%d-%B"),
+                            this_run['state'])))
+                else:
+                    cells.append(gspread.models.Cell(
+                        col=col_id,
+                        row=row_id,
+                        value='NA'))
+    worksheet.update_cells(cells, value_input_option='USER_ENTERED')
 
 
 def fetch_results(host,

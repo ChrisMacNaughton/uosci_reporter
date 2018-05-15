@@ -41,8 +41,14 @@ def result_from_run(run):
     if date < thirty_days_ago:
         return
     name_split = run['fullDisplayName'].split(' ')
+    success = run['result'] == "SUCCESS"
+    if success:
+        state = 'Pass'
+    else:
+        state = 'Fail'
     return {
-        'successful': run['result'] == "SUCCESS",
+        'successful': success,
+        'state': state,
         'url': run['url'],
         'date': date,
         'name': name_split[0],
