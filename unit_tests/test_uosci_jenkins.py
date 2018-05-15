@@ -1,6 +1,6 @@
 import mock
 import unittest
-import uosci.uosci_jenkins as uosci_jenkins
+import uosci_reporter.uosci_jenkins as uosci_jenkins
 
 
 RUNS = [{
@@ -44,7 +44,7 @@ RUNS = [{
   'number': 26,
   'queueId': 86278,
   'result': 'FAILURE',
-  'timestamp': 1525215901043,
+  'timestamp': 1525215903043,
   'url': 'http://10.245.162.49:8080/job/'
              'test_mojo_ceph_radosgw_ha_master_matrix/'
              'MOJO_SPEC=specs%2Fstorage%2Fceph%2Fradosgw_ha,'
@@ -112,3 +112,10 @@ class TestModel(unittest.TestCase):
 
         result = uosci_jenkins.result_from_run(run)
         self.assertFalse(result['successful'])
+
+    def test_update_from_successful_run(self):
+        run = RUNS[0]
+        run['result'] = 'SUCCESS'
+        result = uosci_jenkins.result_from_run(run)
+        self.assertTrue(result['successful'])
+        self.assertEqual(result['state'], 'Pass')
