@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import jenkins as jenkins
 
@@ -36,8 +36,8 @@ def result_from_run(run):
     :returns Summary of the run
     :rtype dict
     """
-    date = datetime.fromtimestamp(run['timestamp'] / 1000)
-    thirty_days_ago = datetime.now() - timedelta(days=30)
+    date = datetime.fromtimestamp(run['timestamp'] / 1000, tz=timezone.utc)
+    thirty_days_ago = datetime.now(tz=timezone.utc) - timedelta(days=30)
     if date < thirty_days_ago:
         return
     name_split = run['fullDisplayName'].split(' ')
