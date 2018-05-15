@@ -46,8 +46,8 @@ def parse_args(args):
     parser.add_argument('-f', '--filter',
                         help='Filter results by job name')
     parser.set_defaults(host='http://10.245.162.49:8080')
-    parser.set_defaults(sheet='https://docs.google.com/spreadsheets/d/1d31P5Qu'
-                              '_nP__gCsoy4u6egpSnG34bMjpVijKtlJSmLU')
+    parser.set_defaults(sheet='https://docs.google.com/spreadsheets/d/'
+                              '1w7fTyG9BcAXKezEJLmNluy5POEt0H-n4ny3a17Q4Tnc')
     parser.set_defaults(filter=None)
     return parser.parse_args(args)
 
@@ -63,7 +63,6 @@ def execute(host,
         username=username,
         password=password,
         filter=filter)
-    # print(results)
     save_results_to_sheet(
         results=results,
         sheet=sheet,
@@ -111,13 +110,13 @@ def process_results_with_worksheet(results, worksheet):
             continue
         run = results[job]
         row_id += 1
-        for (col_id, field) in enumerate(row):
+        for (col_id, _field) in enumerate(row):
             if col_id in SHEET_MAPPING:
                 cells.append(cell_for_row(col_id, row_id, run))
     return cells
 
 def save_results_to_sheet(results, sheet, credentials):
-    print("Saving results to Google Sheet")
+    print("# Saving results to Google Sheet")
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
     credentials = ServiceAccountCredentials.from_json_keyfile_name(
@@ -125,7 +124,8 @@ def save_results_to_sheet(results, sheet, credentials):
     gc = gspread.authorize(credentials)
     worksheet = gc.open_by_url(sheet).sheet1
     cells = process_results_with_worksheet(results, worksheet)
-    worksheet.update_cells(cells, value_input_option='USER_ENTERED')
+    if len(cells) is not 0:
+        worksheet.update_cells(cells, value_input_option='USER_ENTERED')
 
 
 def fetch_results(host,
@@ -135,7 +135,6 @@ def fetch_results(host,
     client = uosci_jenkins.Jenkins(
         host, username=username, password=password)
     jobs = client.matrix('MojoMatrix')
-    # print("Jobs: {}".format(jobs))
     results = {}
     for job in jobs:
         if filter_job(job['name'], filter):
@@ -153,7 +152,7 @@ def filter_job(job_name, filter=None):
 
 
 def main():
-    print("Gathering results from the last Mojo runs")
+    print("# Gathering results from the last Mojo runs")
     args = parse_args(sys.argv[1:])
     execute(host=args.host,
             username=args.username,

@@ -22,8 +22,8 @@ class TestModel(unittest.TestCase):
             filter=None,
             host='http://10.245.162.49:8080',
             password='test-pass',
-            sheet='https://docs.google.com/spreadsheets/d/1d31P5Qu_nP'
-                  '__gCsoy4u6egpSnG34bMjpVijKtlJSmLU',
+            sheet='https://docs.google.com/spreadsheets/d/'
+                  '1w7fTyG9BcAXKezEJLmNluy5POEt0H-n4ny3a17Q4Tnc',
             username='test')
 
     @mock.patch.object(mojo, 'execute')
@@ -41,8 +41,8 @@ class TestModel(unittest.TestCase):
             filter='test_stuff',
             host='http://10.245.162.49:8080',
             password='test-pass',
-            sheet='https://docs.google.com/spreadsheets/d/1d31P5Qu_nP'
-                  '__gCsoy4u6egpSnG34bMjpVijKtlJSmLU',
+            sheet='https://docs.google.com/spreadsheets/d/'
+                  '1w7fTyG9BcAXKezEJLmNluy5POEt0H-n4ny3a17Q4Tnc',
             username='test')
 
     @mock.patch.object(mojo.uosci_jenkins, 'Jenkins')
