@@ -52,21 +52,17 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def execute(host,
-            username,
-            password,
-            sheet,
-            credentials,
+def execute(connfig,
             filter=None):
     results = fetch_results(
-        host=host,
-        username=username,
-        password=password,
+        host=config['jenkions']['host'],
+        username=config['jenkions']['username'],
+        password=config['jenkions']['password'],
         filter=filter)
     save_results_to_sheet(
         results=results,
-        sheet=sheet,
-        credentials=credentials)
+        sheet=config['google']['sheet'],
+        credentials=config['google']['credentials'])
 
 
 def get_job_from_specs(name, specs={}):
@@ -154,9 +150,18 @@ def filter_job(job_name, filter=None):
 def main():
     print("# Gathering results from the last Mojo runs")
     args = parse_args(sys.argv[1:])
-    execute(host=args.host,
-            username=args.username,
-            password=args.password,
-            sheet=args.sheet,
-            credentials=args.google_credentials,
+    jenkins_conf = {
+        'host': args.host,
+        'username': args.username,
+        'password': args.password,
+    }
+    google_conf = {
+        'sheet': args.sheet,
+        'credentials': args.google_credentials,
+    }
+    config = {
+        'jenkins': jenkins_conf,
+        'google': google_conf,
+    }
+    execute(config=config,
             filter=args.filter)
