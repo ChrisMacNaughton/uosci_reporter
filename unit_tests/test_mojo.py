@@ -1,7 +1,11 @@
+from collections import namedtuple
 import mock
 import unittest
 import uosci_reporter.mojo as mojo
 from datetime import datetime, timezone
+
+
+Position = namedtuple('position', ['row', 'col'], verbose=True)
 
 
 class TestModel(unittest.TestCase):
@@ -108,16 +112,8 @@ class TestModel(unittest.TestCase):
         self.assertTrue(mojo.filter_job("test_something", "else"))
 
     def test_get_job_name_from_specs(self):
-        specs = mojo.get_spec_summary({'test_mojo_ha_oneshot_master_matrix': {
-            'artful-pike': {
-                'successful': True,
-                'state': 'Pass',
-                'url': 'http:path/to/jenkins',
-                'date': datetime.fromtimestamp(1525215901043 / 1000,
-                                               tz=timezone.utc),
-                'name': 'test_mojo_ha_oneshot_master_matrix',
-                'spec': 'specs/full_stack/ha_oneshot',
-            }}})
+        specs = mojo.get_spec_summary(
+            {'test_mojo_ha_oneshot_master_matrix': self.row})
         self.assertEqual(
             specs['specs/full_stack/ha_oneshot'],
             'test_mojo_ha_oneshot_master_matrix')
@@ -133,15 +129,19 @@ class TestModel(unittest.TestCase):
         self.assertIsNone(mojo.get_job_from_specs('NoResult', specs))
 
     def test_cell_for_row(self):
-        cell = mojo.cell_for_row(11, 2, self.row)
-        self.assertEqual(cell.row, 2)
-        self.assertEqual(cell.col, 12)
-        self.assertEqual(
-            cell.value,
+        self.assert_cell_value(
+            2,
+            11,
             '=HYPERLINK("http:path/to/jenkins","01-May - Pass")')
 
     def test_cell_for_row_empty_job(self):
-        cell = mojo.cell_for_row(10, 2, self.row)
-        self.assertEqual(cell.row, 2)
-        self.assertEqual(cell.col, 11)
-        self.assertEqual(cell.value, 'NA')
+        self.assert_cell_value(2, 10, 'NA')
+
+    def assert_cell_value(self, row, col, value):
+        cell = mojo.cell_for_row(column_id=col, row_id=row, run=self.row)
+        self.assert_cell(cell, Position(row, col+1), value)
+
+    def assert_cell(self, cell, position, value):
+        self.assertEqual(cell.row, position.row)
+        self.assertEqual(cell.col, position.col)
+        self.assertEqual(cell.value, value)
