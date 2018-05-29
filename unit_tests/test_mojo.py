@@ -7,6 +7,28 @@ from datetime import datetime, timezone
 class TestModel(unittest.TestCase):
     def setUp(self):
         super(TestModel, self).setUp()
+        self.row = {'artful-pike': {
+            'successful': True,
+            'state': 'Pass',
+            'url': 'http:path/to/jenkins',
+            'date': datetime.fromtimestamp(1525215901043 / 1000,
+                                           tz=timezone.utc),
+            'name': 'test_mojo_ha_oneshot_master_matrix',
+            'spec': 'specs/full_stack/ha_oneshot',
+        }}
+
+        self.test_config = {
+            'jenkins': {
+                'host': 'http://10.245.162.49:8080',
+                'username': 'test',
+                'password': 'test-pass',
+            },
+            'google': {
+                'sheet': 'https://docs.google.com/spreadsheets/d/'
+                         '1w7fTyG9BcAXKezEJLmNluy5POEt0H-n4ny3a17Q4Tnc',
+                'credentials': 'creds.json',
+            },
+        }
 
     @mock.patch.object(mojo, 'execute')
     def test_call_main(self, _execute):
@@ -18,32 +40,22 @@ class TestModel(unittest.TestCase):
         finally:
             mojo.argv = old_sys_argv
         _execute.assert_called_with(
-            credentials='creds.json',
-            filter=None,
-            host='http://10.245.162.49:8080',
-            password='test-pass',
-            sheet='https://docs.google.com/spreadsheets/d/'
-                  '1w7fTyG9BcAXKezEJLmNluy5POEt0H-n4ny3a17Q4Tnc',
-            username='test')
+            config=self.test_config,
+            filter=None)
 
     @mock.patch.object(mojo, 'execute')
     def test_filter(self, _execute):
         old_sys_argv = mojo.sys.argv
         mojo.sys.argv = [old_sys_argv[0]] + \
             ['-u', 'test', '-p', 'test-pass', '-f',
-             'test_stuff', '-g', '/home/test/creds.json']
+             'test_stuff', '-g', 'creds.json']
         try:
             mojo.main()
         finally:
             mojo.argv = old_sys_argv
         _execute.assert_called_with(
-            credentials='/home/test/creds.json',
             filter='test_stuff',
-            host='http://10.245.162.49:8080',
-            password='test-pass',
-            sheet='https://docs.google.com/spreadsheets/d/'
-                  '1w7fTyG9BcAXKezEJLmNluy5POEt0H-n4ny3a17Q4Tnc',
-            username='test')
+            config=self.test_config)
 
     @mock.patch.object(mojo.uosci_jenkins, 'Jenkins')
     def test_fetch_results(self, _jenkins):
@@ -121,16 +133,7 @@ class TestModel(unittest.TestCase):
         self.assertIsNone(mojo.get_job_from_specs('NoResult', specs))
 
     def test_cell_for_row(self):
-        cell = mojo.cell_for_row(11, 2, {
-            'artful-pike': {
-                'successful': True,
-                'state': 'Pass',
-                'url': 'http:path/to/jenkins',
-                'date': datetime.fromtimestamp(1525215901043 / 1000,
-                                               tz=timezone.utc),
-                'name': 'test_mojo_ha_oneshot_master_matrix',
-                'spec': 'specs/full_stack/ha_oneshot',
-            }})
+        cell = mojo.cell_for_row(11, 2, self.row)
         self.assertEqual(cell.row, 2)
         self.assertEqual(cell.col, 12)
         self.assertEqual(
@@ -138,16 +141,7 @@ class TestModel(unittest.TestCase):
             '=HYPERLINK("http:path/to/jenkins","01-May - Pass")')
 
     def test_cell_for_row_empty_job(self):
-        cell = mojo.cell_for_row(10, 2, {
-            'artful-pike': {
-                'successful': True,
-                'state': 'Pass',
-                'url': 'http:path/to/jenkins',
-                'date': datetime.fromtimestamp(1525215901043 / 1000,
-                                               tz=timezone.utc),
-                'name': 'test_mojo_ha_oneshot_master_matrix',
-                'spec': 'specs/full_stack/ha_oneshot',
-            }})
+        cell = mojo.cell_for_row(10, 2, self.row)
         self.assertEqual(cell.row, 2)
         self.assertEqual(cell.col, 11)
         self.assertEqual(cell.value, 'NA')
