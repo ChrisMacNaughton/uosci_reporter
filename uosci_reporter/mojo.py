@@ -101,14 +101,19 @@ def process_results_with_worksheet(results, worksheet):
     cells = []
 
     for row_id, row in enumerate(worksheet.get_all_values()):
-        job = get_job_from_specs(row[1], specs)
-        if job is None:
-            continue
-        run = results[job]
-        row_id += 1
-        for (col_id, _field) in enumerate(row):
-            if col_id in SHEET_MAPPING:
-                cells.append(cell_for_row(col_id, row_id, run))
+        for cell in get_cells_for_row(specs, row_id, row):
+            cells.append(cell_for_row(col_id, row_id, run))
+    return cells
+
+def get_cells_for_row(specs, row_id, row):
+    job = get_job_from_specs(row[1], specs)
+    if job is None:
+        return []
+    run = results[job]
+    cells = []
+    for (col_id, _field) in enumerate(row):
+        if col_id in SHEET_MAPPING:
+            cells.append(cell_for_row(col_id, row_id + 1, run))
     return cells
 
 def save_results_to_sheet(results, sheet, credentials):
