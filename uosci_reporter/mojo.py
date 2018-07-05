@@ -52,7 +52,7 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def execute(connfig,
+def execute(config,
             filter=None):
     results = fetch_results(
         host=config['jenkions']['host'],
