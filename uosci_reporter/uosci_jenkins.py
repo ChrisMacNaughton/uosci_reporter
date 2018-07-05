@@ -14,6 +14,8 @@ class Jenkins(jenkins.Jenkins):
         configured job
         """
         job_info = self.get_job_info(job['name'])
+        if job_info is None or job_info['lastBuild'] is None:
+            return {}
         build_info = self.get_build_info(
             job['name'],
             job_info['lastBuild']['number'],

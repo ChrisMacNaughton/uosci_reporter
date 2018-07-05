@@ -45,7 +45,7 @@ def parse_args(args):
                         help='Google Sheet URL')
     parser.add_argument('-f', '--filter',
                         help='Filter results by job name')
-    parser.set_defaults(host='http://10.245.162.49:8080')
+    parser.set_defaults(host='http://10.245.162.58:8080')
     parser.set_defaults(sheet='https://docs.google.com/spreadsheets/d/'
                               '1w7fTyG9BcAXKezEJLmNluy5POEt0H-n4ny3a17Q4Tnc')
     parser.set_defaults(filter=None)
@@ -55,9 +55,9 @@ def parse_args(args):
 def execute(config,
             filter=None):
     results = fetch_results(
-        host=config['jenkions']['host'],
-        username=config['jenkions']['username'],
-        password=config['jenkions']['password'],
+        host=config['jenkins']['host'],
+        username=config['jenkins']['username'],
+        password=config['jenkins']['password'],
         filter=filter)
     save_results_to_sheet(
         results=results,
@@ -101,11 +101,11 @@ def process_results_with_worksheet(results, worksheet):
     cells = []
 
     for row_id, row in enumerate(worksheet.get_all_values()):
-        for cell in get_cells_for_row(specs, row_id, row):
-            cells.append(cell_for_row(col_id, row_id, run))
+        for cell in get_cells_for_row(results, specs, row_id, row):
+            cells.append(cell)
     return cells
 
-def get_cells_for_row(specs, row_id, row):
+def get_cells_for_row(results, specs, row_id, row):
     job = get_job_from_specs(row[1], specs)
     if job is None:
         return []
@@ -168,5 +168,5 @@ def main():
         'jenkins': jenkins_conf,
         'google': google_conf,
     }
-    execute(config=config,
+    execute(config,
             filter=args.filter)
